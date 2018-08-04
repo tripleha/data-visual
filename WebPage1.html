@@ -1,0 +1,1046 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>try_1</title>
+    <script type="text/javascript">
+	    function draw_1(){
+			var heights = new Array(4);
+			heights[0] = 500;
+			heights[1] = 400;
+			heights[2] = 600;
+			heights[3] = 0;
+
+            var names = new Array(4);
+            names[0] = "腾讯";
+            names[1] = "阿里巴巴";
+            names[2] = "papa";
+            names[3] = "haha123";
+
+			var conversion = 10.3;
+
+			draw_animation_bars("c_try", 200, 900, 3, 200, 200, 150,
+                                heights, names, conversion, "各大公司人数统计情况", "人数", "人", 80,
+                                30, 30, 30, 30, 30,
+                                "#000000", "#B5B5B5", "#1C86EE", "#000000", "#B5B5B5", "#B5B5B5",
+                                "#104E8B", "#1874CD", "#458B74", "#43CD80",
+                                "#000000", "#FFFFFF", 0.5);
+	    }
+
+	    function draw_animation_bars(canvas_name, x, y, y_unit_num, x_unit_length, y_unit_length, bar_width,
+                                     heights, names, conversion, x_class, y_class, y_unit, y_unit_font_width,
+                                     font_size_x_unit, font_size_x_class, font_size_y_unit, font_size_y_class, font_size_bar,
+                                     color_x_line, color_x_unit, color_x_class, color_y_line, color_y_unit, color_y_class,
+                                     color_bar_rect_act, color_bar_rect_rest, color_bar_num_act, color_bar_num_rest,
+                                     color_prompt_bg, color_prompt_fg, prompt_transparency, font_family_num, font_family_char) {
+	    	var time_now = new Date();
+	    	var can = document.getElementById(canvas_name);
+	    	if (can === null) {
+				alert("no canvas!");
+				return false;
+			}
+
+	    	var font_sizes = new Object();
+	    	font_sizes.x_unit = font_size_x_unit;
+	    	font_sizes.x_class = font_size_x_class;
+	    	font_sizes.y_unit = font_size_y_unit;
+	    	font_sizes.y_class = font_size_y_class;
+	    	font_sizes.bar = font_size_bar;
+
+	    	var font_families = new Object();
+	    	font_families.num = font_family_num || "sans-serif";
+	    	font_families.char = font_family_char || "sans-serif";
+
+	    	var colors = new Object();
+	    	colors.x_line = color_x_line;
+	    	colors.x_unit = color_x_unit;
+	    	colors.x_class = color_x_class;
+	    	colors.y_line = color_y_line;
+	    	colors.y_unit = color_y_unit;
+	    	colors.y_class = color_y_class;
+	    	colors.brect_act = color_bar_rect_act;
+	    	colors.brect_rest = color_bar_rect_rest;
+	    	colors.bnum_act = color_bar_num_act;
+	    	colors.bnum_rest = color_bar_num_rest;
+	    	colors.prom_bg = color_prompt_bg;
+	    	colors.prom_fg = color_prompt_fg;
+	    	colors.prom_transp = prompt_transparency;
+
+			var axes = new Object();
+			axes.x = x;
+			axes.y = y;
+			axes.x_limit = x_unit_length * names.length;
+			axes.y_limit = y_unit_length * y_unit_num;
+			axes.y_unit_num = y_unit_num;
+			axes.conversion = conversion;
+			axes.y_unit = y_unit;
+			axes.y_unit_font_width = y_unit_font_width;
+			axes.x_class = x_class;
+			axes.y_class = y_class;
+			axes.x_unit_length = x_unit_length;
+			axes.y_unit_length = y_unit_length;
+			axes.bar_width = bar_width;
+
+			axes.font_sizes = font_sizes;
+			axes.font_families = font_families;
+			axes.colors = colors;
+
+			var bars = new Object();
+	    	bars.x = new Array(heights.length);
+	    	bars.y = new Array(heights.length);
+	    	bars.heights = heights;
+	    	bars.names = names;
+	    	for (var i = 1; i <= heights.length; i++) {
+	    	    bars.x[i - 1] = x + i * x_unit_length - bar_width / 2 - x_unit_length / 2;
+	    	    bars.y[i - 1] = y;
+	    	}
+
+	    	animation_axes_x_bar(can, axes, 1, time_now, 1000, bars, 0);
+	    	animation_axes_y(can, axes, 0, time_now, 1000, 0);
+	    }
+
+	    function animation_axes_x_bar(canvas, axes, unit_order, time_begin, timing, bars, last_move){
+	        var x = axes.x;
+	        var y = axes.y;
+	    	var x_limit = axes.x_limit;
+	    	var speed = x_limit / timing;
+
+	    	var context = canvas.getContext("2d");
+	    	context.save();
+	    	var time = new Date();
+	    	var x_move = 0 | ((time.getTime() - time_begin.getTime()) * speed);
+
+	    	context.strokeStyle = axes.colors.x_line;
+
+	    	while (x_move >= unit_order * axes.x_unit_length) {
+	    	    if (unit_order <= bars.names.length) {
+	    	        context.save();
+
+	    	        context.beginPath();
+	    	        context.moveTo(x + unit_order * axes.x_unit_length, y);
+	    	        context.lineTo(x + unit_order * axes.x_unit_length, y + axes.font_sizes.x_unit / 3);
+	    	        context.stroke();
+
+	    	        context.fillStyle = axes.colors.x_unit;
+	    	        context.font = axes.font_sizes.x_unit.toString() + "px " + axes.font_families.char;
+	    	        context.textAlign = "center";
+	    	        context.fillText(bars.names[unit_order - 1], bars.x[unit_order - 1] + axes.bar_width / 2, bars.y[unit_order - 1] + axes.font_sizes.x_unit, axes.x_unit_length);
+
+	    	        context.restore();
+					unit_order++;
+	    		}
+	    	}
+	    	if (time.getTime() - time_begin.getTime() < timing) {
+	    		context.beginPath();
+	    		context.moveTo(x + last_move, y);
+	    		context.lineTo(x + x_move, y);
+	    		context.stroke();
+	    		context.restore();
+	    		window.requestAnimationFrame((function(){
+	    			animation_axes_x_bar(canvas, axes, unit_order, time_begin, timing, bars, x_move);
+	    		}));
+	    		return;
+	    	}
+	    	context.beginPath();
+	    	context.moveTo(x + last_move, y);
+	    	context.lineTo(x + x_limit, y);
+	    	context.stroke();
+
+	    	context.fillStyle = axes.colors.x_class;
+	    	context.font = axes.font_sizes.x_class.toString() + "px " + axes.font_families.char;
+	    	context.textAlign = "center";
+	    	context.fillText(axes.x_class, x + x_limit / 2, y + axes.font_sizes.x_unit * 2 + axes.font_sizes.x_class, axes.x_limit);
+	    	context.restore();
+
+	    	for (var i = 1; i <= bars.heights.length; i++){
+	    		animation_bar(canvas, bars, i, time, 1000, axes);
+	    	}
+	    }
+
+	    function animation_axes_y(canvas, axes, unit_order, time_begin, timing, last_move){
+	        var x = axes.x;
+	        var y = axes.y;
+	    	var y_limit = axes.y_limit;
+	    	var speed = y_limit / timing;
+
+	    	var context = canvas.getContext("2d");
+	    	context.save();
+	    	var time = new Date();
+	    	var y_move = 0 | ((time.getTime() - time_begin.getTime()) * speed);
+
+	    	context.strokeStyle = axes.colors.y_line;
+
+	    	while (y_move >= unit_order * axes.y_unit_length) {
+	    	    if (unit_order <= axes.y_unit_num) {
+	    	        context.save();
+
+	    			context.beginPath();
+	    			context.moveTo(x, y - unit_order * axes.y_unit_length);
+	    			context.lineTo(x - axes.font_sizes.y_unit / 3, y - unit_order * axes.y_unit_length);
+	    			context.stroke();
+
+	    			context.fillStyle = axes.colors.y_unit;
+	    			context.font = axes.font_sizes.y_unit.toString() + "px " + axes.font_families.num;
+			        context.textAlign = "end";
+			        context.fillText(((unit_order * axes.y_unit_length * axes.conversion).toFixed(2) * 1).toString(), x - axes.font_sizes.y_unit / 3, y - unit_order * axes.y_unit_length + axes.font_sizes.y_unit / 2, axes.y_unit_font_width);
+	    			context.restore();
+	    			unit_order++;
+	    		}
+	    	}
+	    	if (time.getTime() - time_begin.getTime() < timing) {
+	    		context.beginPath();
+	    		context.moveTo(x, y - last_move);
+	    		context.lineTo(x, y - y_move);
+	    		context.stroke();
+	    		context.restore();
+	    		window.requestAnimationFrame((function(){
+	    			animation_axes_y(canvas, axes, unit_order, time_begin, timing, y_move);
+	    		}));
+	    		return;
+	    	}
+	    	context.beginPath();
+	    	context.moveTo(x, y - last_move);
+	    	context.lineTo(x, y - y_limit);
+	    	context.stroke();
+
+	    	context.rotate(-Math.PI / 2);
+	    	context.fillStyle = axes.colors.y_class;
+	    	context.font = axes.font_sizes.y_class.toString() + "px " + axes.font_families.char;
+	    	context.textAlign = "center";
+	    	context.fillText(axes.y_class + "/" + axes.y_unit, -axes.y + axes.y_limit / 2, axes.x - axes.y_unit_font_width - axes.font_sizes.y_unit, axes.y_limit);
+	    	context.restore();
+	    }
+
+		function animation_bar(canvas, bars, order, time_begin, timing, axes){
+		    var x = bars.x[order - 1];
+		    var y = bars.y[order - 1];
+			var height_limit = bars.heights[order - 1];
+			var speed = height_limit / timing;
+
+			var context = canvas.getContext("2d");
+			context.save();
+			var time = new Date();
+			var height = 0 | ((time.getTime() - time_begin.getTime()) * speed);
+
+			context.clearRect(axes.x + axes.x_unit_length * (order - 1) + 1, axes.y - height_limit - axes.y_unit_length, axes.x_unit_length - 2, height_limit + axes.y_unit_length - 2);
+
+			//var linear = context.createLinearGradient(x, y, x, y-height_limit);
+			//linear.addColorStop(0, "#DEB887");
+			//linear.addColorStop(1, "#FFE4B5");
+			//context.fillStyle = linear;
+
+			if (time.getTime() - time_begin.getTime() < timing) {
+			    context.fillStyle = axes.colors.brect_rest;
+			    context.fillRect(x, y - height, axes.bar_width, height);
+
+			    context.fillStyle = axes.colors.bnum_rest;
+			    context.font = axes.font_sizes.bar.toString() + "px " + axes.font_families.num;
+			    context.textAlign = "center";
+				context.fillText(((height * axes.conversion).toFixed(2) * 1).toString(), x + axes.bar_width / 2, y - height - axes.bar_width / 10, axes.x_unit_length);
+				context.restore();
+				window.requestAnimationFrame((function(){
+					animation_bar(canvas, bars, order, time_begin, timing, axes);
+				}));
+				return;
+			}
+			context.fillStyle = axes.colors.brect_rest;
+			context.fillRect(x, y - height_limit, axes.bar_width, height_limit);
+
+			context.fillStyle = axes.colors.bnum_rest;
+			context.font = axes.font_sizes.bar.toString() + "px " + axes.font_families.num;
+			context.textAlign = "center";
+			context.fillText(((height_limit * axes.conversion).toFixed(2) * 1).toString(), x + axes.bar_width / 2, y - height_limit - axes.bar_width / 10, axes.x_unit_length);
+			context.restore();
+			if (order == bars.x.length) {
+				canvas.onmousemove = function(){
+				    select_bar(canvas, bars, -1, axes, time);
+				};
+			}
+		}
+
+		function select_bar(canvas, bars, active_order, axes, active_time){
+		    var x = event.pageX - canvas.offsetLeft;
+		    var y = event.pageY - canvas.offsetTop;
+
+			window.pos_x = x;
+			window.pos_y = y;
+
+			var context = canvas.getContext("2d");
+			var time = new Date();
+
+			for (var i = 0; i < bars.x.length; i++) {
+			    if (x >= bars.x[i] && x <= bars.x[i] + axes.bar_width && y >= bars.y[i] - bars.heights[i] && y <= bars.y[i]) {
+			        if (i != active_order) {
+						active_order = i;
+						animation_enlarge_bar(canvas, i, axes.bar_width / 20, time, 300, axes, bars, 1);
+						active_time = time;
+					}
+			        else if (time.getTime() - active_time.getTime() > 300) {
+			            animation_enlarge_bar(canvas, i, axes.bar_width / 20, time, 300, axes, bars, 0);
+					}
+				}
+			    else if (i == active_order) {
+					active_order = -1;
+					animation_narrow_bar(canvas, i, axes.bar_width / 20, time, 300, axes, bars);
+				}
+			}
+			canvas.onmousemove = function(){
+				select_bar(canvas, bars, active_order, axes, active_time);
+			};
+		}
+
+		function animation_enlarge_bar(canvas, order, limit, time_begin, timing, axes, bars, on_play){
+			var x = bars.x[order];
+			var y = bars.y[order];
+			var height = bars.heights[order];
+			var speed = limit / timing;
+			var m_x = window.pos_x;
+			var m_y = window.pos_y;
+			var w = axes.x_unit_length;
+			var h = axes.x_unit_length / 2;
+
+			if (m_x + w >= axes.x + axes.x_limit - 1) {
+			    m_x -= w;
+			}
+			if (m_y + h >= axes.y - 1) {
+				m_y -= h;
+			}
+
+			var context = canvas.getContext("2d");
+			context.save();
+			var time = new Date();
+			var change = (time.getTime() - time_begin.getTime()) * speed;
+
+		    //clear_units(canvas, axes);
+			clear_canvas(canvas);
+			draw_bars(canvas, bars, axes, order);
+
+			if (time.getTime() - time_begin.getTime() < timing && on_play) {
+			    context.fillStyle = axes.colors.brect_act;
+			    context.fillRect(x - change, y - height - change, axes.bar_width + 2 * change, height + change);
+
+			    context.fillStyle = axes.colors.bnum_act;
+				context.font = axes.font_sizes.bar.toString() + "px " + axes.font_families.num;
+				context.textAlign = "center";
+				context.fillText(((height * axes.conversion).toFixed(2) * 1).toString(), x + axes.bar_width / 2, y - height - change - axes.bar_width / 10, axes.x_unit_length);
+				context.restore();
+
+				if (m_x > axes.x + 1 && m_x + w < axes.x + axes.x_limit - 1 && m_y + h <= axes.y && m_y > axes.y - axes.y_limit + 1) {
+					context.save();
+
+					context.beginPath();
+					context.moveTo(m_x + w / 8, m_y);
+					context.lineTo(m_x + w - w / 8, m_y);
+					context.quadraticCurveTo(m_x + w, m_y, m_x + w, m_y + h / 4);
+					context.lineTo(m_x + w, m_y + h - h / 4);
+					context.quadraticCurveTo(m_x + w, m_y + h, m_x + w - w / 8, m_y + h);
+					context.lineTo(m_x + w / 8, m_y + h);
+					context.quadraticCurveTo(m_x, m_y + h, m_x, m_y + h - h / 4);
+					context.lineTo(m_x, m_y + h / 4);
+					context.quadraticCurveTo(m_x, m_y, m_x + w / 8, m_y);
+
+					context.fillStyle = axes.colors.prom_bg;
+					context.globalAlpha = axes.colors.prom_transp;
+					context.fill();
+
+					context.fillStyle = axes.colors.prom_fg;
+					context.font = axes.font_sizes.x_unit.toString() + "px " + axes.font_families.char;
+					context.textAlign = "center";
+					context.fillText(bars.names[order], m_x + w / 2, m_y + h / 2, w);
+
+					context.font = axes.font_sizes.y_unit.toString() + "px " + axes.font_families.num;
+					context.fillText(((height * axes.conversion).toFixed(2) * 1).toString() + axes.y_unit, m_x + w / 2, m_y + h - h / 4, w);
+
+					context.restore();
+				}
+
+				window.requestAnimationFrame((function(){
+					animation_enlarge_bar(canvas, order, limit, time_begin, timing, axes, bars, 1);
+				}));
+				return;
+			}
+			context.fillStyle = axes.colors.brect_act;
+			context.fillRect(x - limit, y - height - limit, axes.bar_width + 2 * limit, height + limit);
+
+			context.fillStyle = axes.colors.bnum_act;
+			context.font = axes.font_sizes.bar.toString() + "px " + axes.font_families.num;
+			context.textAlign = "center";
+			context.fillText(((height * axes.conversion).toFixed(2) * 1).toString(), x + axes.bar_width / 2, y - height - limit - axes.bar_width / 10, axes.x_unit_length);
+			context.restore();
+
+			if (m_x > axes.x + 1 && m_x + w < axes.x + axes.x_limit - 1 && m_y + h <= axes.y && m_y > axes.y - axes.y_limit + 1) {
+			    context.save();
+
+				context.beginPath();
+				context.moveTo(m_x + w / 8, m_y);
+				context.lineTo(m_x + w - w / 8, m_y);
+				context.quadraticCurveTo(m_x + w, m_y, m_x + w, m_y + h / 4);
+				context.lineTo(m_x + w, m_y + h - h / 4);
+				context.quadraticCurveTo(m_x + w, m_y + h, m_x + w - w / 8, m_y + h);
+				context.lineTo(m_x + w / 8, m_y + h);
+				context.quadraticCurveTo(m_x, m_y + h, m_x, m_y + h - h / 4);
+				context.lineTo(m_x, m_y + h / 4);
+				context.quadraticCurveTo(m_x, m_y, m_x + w / 8, m_y);
+
+				context.fillStyle = axes.colors.prom_bg;
+				context.globalAlpha = axes.colors.prom_transp;
+				context.fill();
+
+				context.fillStyle = axes.colors.prom_fg;
+				context.font = axes.font_sizes.x_unit.toString() + "px " + axes.font_families.char;
+				context.textAlign = "center";
+				context.fillText(bars.names[order], m_x + w / 2, m_y + h / 2, w);
+
+				context.font = axes.font_sizes.y_unit.toString() + "px " + axes.font_families.num;
+				context.fillText(((height * axes.conversion).toFixed(2) * 1).toString() + axes.y_unit, m_x + w / 2, m_y + h - h / 4, w);
+
+				context.restore();
+			}
+		}
+
+		function animation_narrow_bar(canvas, order, limit, time_begin, timing, axes, bars){
+			var x = bars.x[order];
+			var y = bars.y[order];
+			var height = bars.heights[order];
+			var speed = limit / timing;
+
+			var context = canvas.getContext("2d");
+			context.save();
+			var time = new Date();
+			var change = (time.getTime() - time_begin.getTime()) * speed;
+
+		    //clear_units(canvas, axes);
+			clear_canvas(canvas);
+			draw_bars(canvas, bars, axes, order);
+
+			if (time.getTime() - time_begin.getTime() < timing) {
+			    context.fillStyle = axes.colors.brect_rest;
+				context.fillRect(x - limit + change, y - height - limit + change, axes.bar_width + 2 * limit - 2 * change, height + limit - change);
+
+				context.fillStyle = axes.colors.bnum_rest;
+				context.font = axes.font_sizes.bar.toString() + "px " + axes.font_families.num;
+				context.textAlign = "center";
+				context.fillText(((height * axes.conversion).toFixed(2) * 1).toString(), x + axes.bar_width / 2, y - height - limit + change - axes.bar_width / 10, axes.x_unit_length);
+				context.restore();
+				window.requestAnimationFrame((function(){
+					animation_narrow_bar(canvas, order, limit, time_begin, timing, axes, bars);
+				}));
+				return;
+			}
+			context.fillStyle = axes.colors.bnum_rest;
+			context.font = axes.font_sizes.bar.toString() + "px " + axes.font_families.num;
+			context.textAlign = "center";
+			context.fillText(((height * axes.conversion).toFixed(2) * 1).toString(), x + axes.bar_width / 2, y - height - axes.bar_width / 10, axes.x_unit_length);
+			context.restore();
+		}
+
+		function draw_bars(canvas, bars, axes, active_order){
+		    var context = canvas.getContext("2d");
+
+		    context.save();
+
+			context.strokeStyle = axes.colors.x_line;
+			context.beginPath();
+			context.moveTo(axes.x, axes.y);
+			context.lineTo(axes.x + axes.x_limit, axes.y);
+			context.stroke();
+
+			context.strokeStyle = axes.colors.y_line;
+			context.beginPath();
+			context.moveTo(axes.x, axes.y);
+			context.lineTo(axes.x, axes.y - axes.y_limit);
+			context.stroke();
+
+			context.fillStyle = axes.colors.y_unit;
+			context.font = axes.font_sizes.y_unit.toString() + "px " + axes.font_families.num;
+			context.textAlign = "end";
+			for (var i = 0; i <= axes.y_unit_num; i++) {
+			    context.beginPath();
+			    context.moveTo(axes.x, axes.y - i * axes.y_unit_length);
+			    context.lineTo(axes.x - axes.font_sizes.y_unit / 3, axes.y - i * axes.y_unit_length);
+			    context.stroke();
+
+			    context.fillText(((i * axes.y_unit_length * axes.conversion).toFixed(2) * 1).toString(), axes.x - axes.font_sizes.y_unit / 3, axes.y - i * axes.y_unit_length + axes.font_sizes.y_unit / 2, axes.y_unit_font_width);
+			}
+
+			context.strokeStyle = axes.colors.x_line;
+			context.fillStyle = axes.colors.x_unit;
+			context.font = axes.font_sizes.x_unit.toString() + "px " + axes.font_families.char;
+			context.textAlign = "center";
+			for (i = 0; i < bars.x.length; i++) {
+			    context.beginPath();
+			    context.moveTo(axes.x + (i + 1) * axes.x_unit_length, axes.y);
+			    context.lineTo(axes.x + (i + 1) * axes.x_unit_length, axes.y + axes.font_sizes.x_unit / 3);
+			    context.stroke();
+
+			    context.fillText(bars.names[i], bars.x[i] + axes.bar_width / 2, bars.y[i] + axes.font_sizes.x_unit, axes.x_unit_length);
+			}
+			context.fillStyle = axes.colors.x_class;
+			context.font = axes.font_sizes.x_class.toString() + "px " + axes.font_families.char;
+			context.textAlign = "center";
+			context.fillText(axes.x_class, axes.x + axes.x_limit / 2, axes.y + axes.font_sizes.x_unit * 2 + axes.font_sizes.x_class, axes.x_limit);
+
+			context.rotate(-Math.PI / 2);
+			context.fillStyle = axes.colors.y_class;
+			context.font = axes.font_sizes.y_class.toString() + "px " + axes.font_families.char;
+			context.textAlign = "center";
+			context.fillText(axes.y_class + "/" + axes.y_unit, -axes.y + axes.y_limit / 2, axes.x - axes.y_unit_font_width - axes.font_sizes.y_unit, axes.y_limit);
+
+			context.restore();
+
+			context.save();
+			for (i = 0; i < bars.x.length; i++){
+			    context.fillStyle = axes.colors.brect_rest;
+				context.fillRect(bars.x[i], bars.y[i] - bars.heights[i], axes.bar_width, bars.heights[i]);
+				if (i != active_order) {
+				    context.fillStyle = axes.colors.bnum_rest;
+				    context.font = axes.font_sizes.bar.toString() + "px " + axes.font_families.num;
+					context.textAlign = "center";
+					context.fillText(((bars.heights[i] * axes.conversion).toFixed(2) * 1).toString(), bars.x[i] + axes.bar_width / 2, bars.y[i] - bars.heights[i] - axes.bar_width / 10, axes.x_unit_length);
+				}
+			}
+			context.restore();
+		}
+
+        function draw_2(){
+			var heights = new Array(4);
+			heights[0] = 500;
+			heights[1] = 400;
+			heights[2] = 600;
+			heights[3] = 0;
+
+            var names = new Array(4);
+            names[0] = "微软";
+            names[1] = "谷谷谷谷歌";
+            names[2] = "papa";
+            names[3] = "haha123";
+
+			var conversion = 0.333;
+
+			draw_animation_points("c_try", 200, 800, 3, 200, 200, 10,
+                                  heights, names, conversion, "各大公司员工日薪统计", "日工资", "元", 80,
+                                  30, 30, 30, 30, 30,
+                                  "#000000", "#B5B5B5", "#1C86EE", "#000000", "#B5B5B5", "#B5B5B5",
+                                  "#104E8B", "#1874CD", "#458B74", "#43CD80", "#FF34B3",
+                                  "#000000", "#FFFFFF", 0.5);
+        }
+
+        function draw_animation_points(canvas_name, x, y, y_unit_num, x_unit_length, y_unit_length, radius,
+                                       heights, names, conversion, x_class, y_class, y_unit, y_unit_font_width,
+                                       font_size_x_unit, font_size_x_class, font_size_y_unit, font_size_y_class, font_size_point,
+                                       color_x_line, color_x_unit, color_x_class, color_y_line, color_y_unit, color_y_class,
+                                       color_point_cir_act, color_point_cir_rest, color_point_num_act, color_point_num_rest,
+                                       color_point_line,
+                                       color_prompt_bg, color_prompt_fg, prompt_transparency, font_family_num, font_family_char) {
+	    	var time_now = new Date();
+	    	var can = document.getElementById(canvas_name);
+			if(can === null){
+				alert("no canvas!");
+				return false;
+			}
+
+			var font_sizes = new Object();
+			font_sizes.x_unit = font_size_x_unit;
+			font_sizes.x_class = font_size_x_class;
+			font_sizes.y_unit = font_size_y_unit;
+			font_sizes.y_class = font_size_y_class;
+			font_sizes.point = font_size_point;
+
+			var font_families = new Object();
+			font_families.num = font_family_num || "sans-serif";
+			font_families.char = font_family_char || "sans-serif";
+
+			var colors = new Object();
+			colors.x_line = color_x_line;
+			colors.x_unit = color_x_unit;
+			colors.x_class = color_x_class;
+			colors.y_line = color_y_line;
+			colors.y_unit = color_y_unit;
+			colors.y_class = color_y_class;
+			colors.pcir_act = color_point_cir_act;
+			colors.pcir_rest = color_point_cir_rest;
+			colors.pnum_act = color_point_num_act;
+			colors.pnum_rest = color_point_num_rest;
+			colors.pline = color_point_line;
+			colors.prom_bg = color_prompt_bg;
+			colors.prom_fg = color_prompt_fg;
+			colors.prom_transp = prompt_transparency;
+
+			var axes = new Object();
+			axes.x = x;
+			axes.y = y;
+			axes.x_limit = x_unit_length * (names.length + 1);
+			axes.y_limit = y_unit_length * y_unit_num;
+			axes.y_unit_num = y_unit_num;
+			axes.conversion = conversion;
+			axes.y_unit = y_unit;
+			axes.y_unit_font_width = y_unit_font_width;
+			axes.x_class = x_class;
+			axes.y_class = y_class;
+			axes.x_unit_length = x_unit_length;
+			axes.y_unit_length = y_unit_length;
+			axes.radius = radius;
+
+			axes.font_sizes = font_sizes;
+			axes.font_families = font_families;
+			axes.colors = colors;
+
+	    	var points = new Object();
+	    	points.x = new Array(heights.length);
+	    	points.y = new Array(heights.length);
+	    	points.heights = heights;
+	    	points.names = names;
+	    	for (var i = 1; i <= heights.length; i++){
+	    	    points.x[i - 1] = x + x_unit_length * i;
+	    	    points.y[i - 1] = y - heights[i - 1];
+	    	}
+
+   			animation_axes_x_point(can, axes, 1, time_now, 1000, points, 0);
+			animation_axes_y(can, axes, 0, time_now, 1000, 0);
+		}
+
+	    function animation_axes_x_point(canvas, axes, unit_order, time_begin, timing, points, last_move){
+	        var x = axes.x;
+	        var y = axes.y;
+	    	var x_limit = axes.x_limit;
+	    	var speed = x_limit / timing;
+
+	    	var context = canvas.getContext("2d");
+	    	context.save();
+	    	var time = new Date();
+	    	var x_move = 0 | ((time.getTime() - time_begin.getTime()) * speed);
+
+	    	context.strokeStyle = axes.colors.x_line;
+
+	    	while (x_move >= unit_order * axes.x_unit_length) {
+	    	    if (unit_order <= points.names.length) {
+	    	        context.save();
+
+	    			context.beginPath();
+	    			context.moveTo(points.x[unit_order - 1], y);
+	    			context.lineTo(points.x[unit_order - 1], y + axes.font_sizes.x_unit / 3);
+	    			context.stroke();
+
+	    			context.fillStyle = axes.colors.x_unit;
+	    			context.font = axes.font_sizes.x_unit.toString() + "px " + axes.font_families.char;
+					context.textAlign = "center";
+					context.fillText(points.names[unit_order - 1], points.x[unit_order - 1], y + axes.font_sizes.x_unit / 3 * 4, axes.x_unit_length);
+					context.restore();
+					unit_order++;
+	    	    }
+	    	    else if (x_move >= x_limit) {
+	    	        context.beginPath();
+	    	        context.moveTo(x + unit_order * axes.x_unit_length, y);
+	    	        context.lineTo(x + unit_order * axes.x_unit_length, y + axes.font_sizes.x_unit / 3);
+	    	        context.stroke();
+	    	        break;
+	    	    }
+	    	}
+	    	if (time.getTime() - time_begin.getTime() < timing) {
+	    		context.beginPath();
+	    		context.moveTo(x + last_move, y);
+	    		context.lineTo(x + x_move, y);
+	    		context.stroke();
+	    		context.restore();
+	    		window.requestAnimationFrame((function(){
+	    			animation_axes_x_point(canvas, axes, unit_order, time_begin, timing, points, x_move);
+	    		}));
+	    		return;
+	    	}
+	    	context.beginPath();
+	    	context.moveTo(x + last_move, y);
+	    	context.lineTo(x + x_limit, y);
+	    	context.stroke();
+
+	    	context.fillStyle = axes.colors.x_class;
+	    	context.font = axes.font_sizes.x_class.toString() + "px " + axes.font_families.char;
+	    	context.textAlign = "center";
+	    	context.fillText(axes.x_class, x + x_limit / 2, y + axes.font_sizes.x_unit / 3 * 7 + axes.font_sizes.x_class, axes.x_limit);
+	    	context.restore();
+
+	    	for (var i = 1; i <= points.heights.length; i++){
+	    	    if (i == 1) {
+	    			animation_line(canvas, points.x[0], points.y[0], time, 1000, i, points, axes, 0, 0);
+	    		}
+	    	    else {
+	    			animation_line(canvas, points.x[i-2], points.y[i-2], time, 1000, i, points, axes, 0, 0);
+	    		}
+			}
+	    }
+
+		function animation_point(canvas, order, points, time_begin, timing, axes){
+		    var speed = Math.PI * 2 / timing;
+
+		    var x = points.x[order - 1];
+		    var y = points.y[order - 1];
+		    var height = points.heights[order - 1];
+
+			var context = canvas.getContext("2d");
+			context.save();
+			var time = new Date();
+			var angle_move = (time.getTime() - time_begin.getTime()) * speed;
+
+			if (time.getTime() - time_begin.getTime() < timing) {
+				context.beginPath();
+				context.arc(x, y, axes.radius, 0, angle_move);
+				context.lineTo(x, y);
+				context.closePath();
+				context.fillStyle = axes.colors.pcir_rest;
+				context.fill();
+				context.restore();
+				window.requestAnimationFrame((function(){
+					animation_point(canvas, order, points, time_begin, timing, axes);
+				}));
+				return;
+			}
+			context.beginPath();
+			context.arc(x, y, axes.radius, 0, Math.PI * 2);
+			context.lineTo(x, y);
+			context.closePath();
+			context.fillStyle = axes.colors.pcir_rest;
+			context.fill();
+
+			context.fillStyle = axes.colors.pnum_rest;
+			context.font = axes.font_sizes.point.toString() + "px " + axes.font_families.num;
+			context.textAlign = "center";
+			context.fillText(((height * axes.conversion).toFixed(2) * 1).toString(), x, y - axes.font_sizes.point / 3 * 2, axes.x_unit_length);
+			context.restore();
+			if (order == points.x.length) {
+				canvas.onmousemove = function(){
+					select_point(canvas, points, -1, axes, time);
+				};
+			}
+		}
+
+		function animation_line(canvas, x, y, time_begin, timing, order, points, axes, last_x, last_y){
+		    if (x == points.x[order - 1] && y == points.y[order - 1]) {
+				var time = new Date();
+				if (time.getTime() - time_begin.getTime() < timing) {
+					window.requestAnimationFrame((function(){
+						animation_line(canvas, x, y, time_begin, timing, order, points, axes, 0, 0);
+					}));
+					return;
+				}
+				animation_point(canvas, order, points, time, 1000, axes);
+				return;
+			}
+		    var next_x = points.x[order - 1];
+		    var next_y = points.y[order - 1];
+		    var x_speed = (next_x - x) / timing;
+		    var y_speed = (next_y - y) / timing;
+
+			var context = canvas.getContext("2d");
+			context.save();
+			var time = new Date();
+			var x_move = ((time.getTime() - time_begin.getTime()) * x_speed);
+			var y_move = ((time.getTime() - time_begin.getTime()) * y_speed);
+
+			context.strokeStyle = axes.colors.pline;
+
+			if (time.getTime() - time_begin.getTime() < timing) {
+				context.beginPath();
+				context.moveTo(x + last_x, y + last_y);
+				context.lineTo(x + x_move, y + y_move);
+				context.stroke();
+				context.restore();
+				window.requestAnimationFrame((function(){
+				    animation_line(canvas, x, y, time_begin, timing, order, points, axes, x_move, y_move);
+				}));
+				return;
+			}
+			context.beginPath();
+			context.moveTo(x + last_x, y + last_y);
+			context.lineTo(next_x, next_y);
+			context.stroke();
+			context.restore();
+			animation_point(canvas, order, points, time, 1000, axes);
+		}
+
+		function select_point(canvas, points, active_order, axes, active_time){
+		    var x = event.pageX - canvas.offsetLeft;
+		    var y = event.pageY - canvas.offsetTop;
+
+			window.pos_x = x;
+			window.pos_y = y;
+
+			var context = canvas.getContext("2d");
+			var time = new Date();
+
+			for (var i = 0; i < points.x.length; i++){
+			    if ((x - points.x[i]) * (x - points.x[i]) + (y - points.y[i]) * (y - points.y[i]) <= axes.radius * axes.radius) {
+			        if (i != active_order) {
+						active_order = i;
+						animation_enlarge_point(canvas, i, axes.radius / 2 * 3, time, 300, axes, points, 1);
+						active_time = time;
+					}
+			        else if (time.getTime() - active_time.getTime() > 300) {
+			            animation_enlarge_point(canvas, i, axes.radius / 2 * 3, time, 300, axes, points, 0);
+					}
+				}
+			    else if (i == active_order) {
+					active_order = -1;
+					animation_narrow_point(canvas, i, axes.radius / 2 * 3, time, 300, axes, points);
+				}
+			}
+			canvas.onmousemove = function(){
+				select_point(canvas, points, active_order, axes, active_time);
+			};
+		}
+
+		function animation_enlarge_point(canvas, order, r_limit, time_begin, timing, axes, points, on_play){
+			var x = points.x[order];
+			var y = points.y[order];
+			var speed = (r_limit - axes.radius) / timing;
+			var m_x = window.pos_x;
+			var m_y = window.pos_y;
+			var w = axes.x_unit_length;
+			var h = axes.x_unit_length / 2;
+
+			if (m_x + w >= axes.x + axes.x_limit - 1) {
+				m_x -= w;
+			}
+			if (m_y + h >= axes.y - 1) {
+				m_y -= h;
+			}
+
+			var context = canvas.getContext("2d");
+			context.save();
+			var time = new Date();
+			var r = (time.getTime() - time_begin.getTime()) * speed + axes.radius;
+
+			//clear_units(canvas, axes);
+			clear_canvas(canvas);
+			draw_points(canvas, points, axes);
+
+			if (time.getTime() - time_begin.getTime() < timing && on_play) {
+				context.beginPath();
+				context.arc(x, y, r, 0, Math.PI * 2);
+				context.fillStyle = axes.colors.pcir_act;
+				context.fill();
+
+				context.fillStyle = axes.colors.pnum_act;
+				context.font = axes.font_sizes.point.toString() + "px " + axes.font_families.num;
+				context.textAlign = "center";
+				context.fillText(((points.heights[order] * axes.conversion).toFixed(2) * 1).toString(), points.x[order], points.y[order] - axes.font_sizes.point / 3 * 2, axes.x_unit_length);
+				context.restore();
+
+				if (m_x > axes.x + 1 && m_x + w < axes.x + axes.x_limit - 1 && m_y + h <= axes.y + axes.radius && m_y > axes.y - axes.y_limit + 1) {
+					context.save();
+
+					context.beginPath();
+					context.moveTo(m_x + w / 8, m_y);
+					context.lineTo(m_x + w - w / 8, m_y);
+					context.quadraticCurveTo(m_x + w, m_y, m_x + w, m_y + h / 4);
+					context.lineTo(m_x + w, m_y + h - h / 4);
+					context.quadraticCurveTo(m_x + w, m_y + h, m_x + w - w / 8, m_y + h);
+					context.lineTo(m_x + w / 8, m_y + h);
+					context.quadraticCurveTo(m_x, m_y + h, m_x, m_y + h - h / 4);
+					context.lineTo(m_x, m_y + h / 4);
+					context.quadraticCurveTo(m_x, m_y, m_x + w / 8, m_y);
+
+					context.fillStyle = axes.colors.prom_bg;
+					context.globalAlpha = axes.colors.prom_transp;
+					context.fill();
+
+					context.fillStyle = axes.colors.prom_fg;
+					context.font = axes.font_sizes.x_unit.toString() + "px " + axes.font_families.char;
+					context.textAlign = "center";
+					context.fillText(points.names[order], m_x + w / 2, m_y + h / 2, w);
+
+					font = axes.font_sizes.y_unit.toString() + "px " + axes.font_families.num;
+					context.fillText(((points.heights[order] * axes.conversion).toFixed(2) * 1).toString() + axes.y_unit, m_x + w / 2, m_y + h - h / 4, w);
+
+					context.restore();
+				}
+
+				window.requestAnimationFrame((function(){
+					animation_enlarge_point(canvas, order, r_limit, time_begin, timing, axes, points, 1);
+				}));
+				return;
+			}
+			context.beginPath();
+			context.arc(x, y, r_limit, 0, Math.PI * 2);
+			context.fillStyle = axes.colors.pcir_act;
+			context.fill();
+
+			context.fillStyle = axes.colors.pnum_act;
+			context.font = axes.font_sizes.point.toString() + "px " + axes.font_families.num;
+			context.textAlign = "center";
+			context.fillText(((points.heights[order] * axes.conversion).toFixed(2) * 1).toString(), points.x[order], points.y[order] - axes.font_sizes.point / 3 * 2, axes.x_unit_length);
+			context.restore();
+
+			if (m_x > axes.x + 1 && m_x + w < axes.x + axes.x_limit - 1 && m_y + h <= axes.y + axes.radius && m_y > axes.y - axes.y_limit + 1) {
+				context.save();
+
+				context.beginPath();
+				context.moveTo(m_x + w / 8, m_y);
+				context.lineTo(m_x + w - w / 8, m_y);
+				context.quadraticCurveTo(m_x + w, m_y, m_x + w, m_y + h / 4);
+				context.lineTo(m_x + w, m_y + h - h / 4);
+				context.quadraticCurveTo(m_x + w, m_y + h, m_x + w - w / 8, m_y + h);
+				context.lineTo(m_x + w / 8, m_y + h);
+				context.quadraticCurveTo(m_x, m_y + h, m_x, m_y + h - h / 4);
+				context.lineTo(m_x, m_y + h / 4);
+				context.quadraticCurveTo(m_x, m_y, m_x + w / 8, m_y);
+
+				context.fillStyle = axes.colors.prom_bg;
+				context.globalAlpha = axes.colors.prom_transp;
+				context.fill();
+
+				context.fillStyle = axes.colors.prom_fg;
+				context.font = axes.font_sizes.x_unit.toString() + "px " + axes.font_families.char;
+				context.textAlign = "center";
+				context.fillText(points.names[order], m_x + w / 2, m_y + h / 2, w);
+
+				font = axes.font_sizes.y_unit.toString() + "px " + axes.font_families.num;
+				context.fillText(((points.heights[order] * axes.conversion).toFixed(2) * 1).toString() + axes.y_unit, m_x + w / 2, m_y + h - h / 4, w);
+
+				context.restore();
+			}
+		}
+
+		function animation_narrow_point(canvas, order, r_limit, time_begin, timing, axes, points){
+			var x = points.x[order];
+			var y = points.y[order];
+			var speed = (r_limit - axes.radius) / timing;
+
+			var context = canvas.getContext("2d");
+			context.save();
+			var time = new Date();
+			var r = r_limit - (time.getTime() - time_begin.getTime()) * speed;
+
+			//clear_units(canvas, axes);
+			clear_canvas(canvas);
+			draw_points(canvas, points, axes);
+
+			if (time.getTime() - time_begin.getTime() < timing) {
+				context.beginPath();
+				context.arc(x, y, r, 0, Math.PI * 2);
+				context.fillStyle = axes.colors.pcir_rest;
+				context.fill();
+				context.restore();
+				window.requestAnimationFrame((function(){
+					animation_narrow_point(canvas, order, r_limit, time_begin, timing, axes, points);
+				}));
+				return;
+			}
+			//context.beginPath();
+		    //context.arc(x, y, axes.radius, 0, Math.PI*2);
+			//context.fillStyle = "#FFE4B5";
+			//context.fill();
+			context.restore();
+		}
+
+		function clear_units(canvas, axes){
+			var context = canvas.getContext("2d");
+			context.clearRect(axes.x + 1, axes.y + 1 - axes.y_limit, axes.x_limit - 2, axes.y_limit - 2);
+		}
+
+		function draw_points(canvas, points, axes){
+		    var context = canvas.getContext("2d");
+
+		    context.save();
+		    
+		    context.strokeStyle = axes.colors.x_line;
+		    context.beginPath();
+		    context.moveTo(axes.x, axes.y);
+		    context.lineTo(axes.x + axes.x_limit, axes.y);
+		    context.stroke();
+
+		    context.strokeStyle = axes.colors.y_line;
+		    context.beginPath();
+		    context.moveTo(axes.x, axes.y);
+		    context.lineTo(axes.x, axes.y - axes.y_limit);
+		    context.stroke();
+
+		    context.fillStyle = axes.colors.y_unit;
+		    context.font = axes.font_sizes.y_unit.toString() + "px " + axes.font_families.num;
+		    context.textAlign = "end";
+		    for (var i = 0; i <= axes.y_unit_num; i++) {
+		        context.beginPath();
+		        context.moveTo(axes.x, axes.y - i * axes.y_unit_length);
+		        context.lineTo(axes.x - axes.font_sizes.y_unit / 3, axes.y - i * axes.y_unit_length);
+		        context.stroke();
+
+		        context.fillText(((i * axes.y_unit_length * axes.conversion).toFixed(2) * 1).toString(), axes.x - axes.font_sizes.y_unit / 3, axes.y - i * axes.y_unit_length + axes.font_sizes.y_unit / 2, axes.y_unit_font_width);
+		    }
+
+		    context.strokeStyle = axes.colors.x_line;
+		    context.fillStyle = axes.colors.x_unit;
+		    context.font = axes.font_sizes.x_unit.toString() + "px " + axes.font_families.char;
+		    context.textAlign = "center";
+		    for (i = 0; i < points.x.length; i++) {
+		        context.beginPath();
+		        context.moveTo(points.x[i], axes.y);
+		        context.lineTo(points.x[i], axes.y + axes.font_sizes.x_unit / 3);
+		        context.stroke();
+
+		        context.fillText(points.names[i], points.x[i], axes.y + axes.font_sizes.x_unit / 3 * 4, axes.x_unit_length);
+		    }
+		    context.beginPath();
+		    context.moveTo(axes.x + (points.x.length + 1) * axes.x_unit_length, axes.y);
+		    context.lineTo(axes.x + (points.x.length + 1) * axes.x_unit_length, axes.y + axes.font_sizes.x_unit / 3);
+		    context.stroke();
+
+		    context.fillStyle = axes.colors.x_class;
+		    context.font = axes.font_sizes.x_class.toString() + "px " + axes.font_families.char;
+		    context.textAlign = "center";
+		    context.fillText(axes.x_class, axes.x + axes.x_limit / 2, axes.y + axes.font_sizes.x_unit / 3 * 7 + axes.font_sizes.x_class, axes.x_limit);
+
+		    context.rotate(-Math.PI / 2);
+		    context.fillStyle = axes.colors.y_class;
+		    context.font = axes.font_sizes.y_class.toString() + "px " + axes.font_families.char;
+		    context.textAlign = "center";
+		    context.fillText(axes.y_class + "/" + axes.y_unit, -axes.y + axes.y_limit / 2, axes.x - axes.y_unit_font_width - axes.font_sizes.y_unit, axes.y_limit);
+
+		    context.restore();
+
+		    context.save();
+		    context.strokeStyle = axes.colors.pline;
+			for (i = 0; i < points.x.length - 1; i++) {
+				context.beginPath();
+				context.moveTo(points.x[i], points.y[i]);
+				context.lineTo(points.x[i + 1], points.y[i + 1]);
+				context.stroke();
+			}
+			context.restore();
+			context.save();
+			for (i = 0; i < points.x.length; i++) {
+				context.beginPath();
+				context.arc(points.x[i], points.y[i], axes.radius, 0, Math.PI * 2);
+				context.lineTo(points.x[i], points.y[i]);
+				context.closePath();
+				context.fillStyle = axes.colors.pcir_rest;
+				context.fill();
+
+				context.fillStyle = axes.colors.pnum_rest;
+				context.font = axes.font_sizes.point.toString() + "px " + axes.font_families.num;
+				context.textAlign = "center";
+				context.fillText(((points.heights[i] * axes.conversion).toFixed(2) * 1).toString(), points.x[i], points.y[i] - axes.font_sizes.point / 3 * 2, axes.x_unit_length);
+			}
+			context.restore();
+		}
+
+		function clear_canvas(canvas){
+			var context = canvas.getContext("2d");
+			context.clearRect(0, 0, canvas.width, canvas.height);
+		}
+
+		function clear_all(canvas_name){
+			var can = document.getElementById(canvas_name);
+			if(can === null){
+				alert("no canvas!");
+				return false;
+			}
+			clear_canvas(can);
+			can.onmousemove = function(){};
+		}
+    </script>
+</head>
+<body>
+    <canvas id="c_try" width="1280" height="1024"></canvas>
+    <button onclick="draw_1()">柱状</button>
+    <button onclick="draw_2()">折线</button>
+    <button onclick="clear_all('c_try')">清除</button>
+</body>
+</html>
